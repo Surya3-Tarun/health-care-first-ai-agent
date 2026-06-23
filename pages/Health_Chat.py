@@ -10,6 +10,16 @@ from utils.emergency_detector import detect_emergency_condition
 if 'suggested_input' not in st.session_state:
     st.session_state.suggested_input = None
 
+if 'chat_history' not in st.session_state:
+    st.session_state.chat_history = []
+
+if 'conversation_count' not in st.session_state:
+    st.session_state.conversation_count = 0
+
+if 'emergency_alerts' not in st.session_state:
+    st.session_state.emergency_alerts = 0
+
+
 def render_health_chat():
     """🤖 AI Health Chat interface with streaming responses."""
     
@@ -65,11 +75,10 @@ def render_health_chat():
     
     st.markdown("---")
     
-    # Centralized submission handler so Enter key and click behave the same
-    def _process_submission():
-        user_input = st.session_state.get('health_input', '')
+    def _process_submission(user_input: str):
         if not user_input or not user_input.strip():
             return
+
         user_input = user_input.strip()
         st.session_state.conversation_count += 1
 
@@ -86,7 +95,6 @@ def render_health_chat():
             """, unsafe_allow_html=True)
             st.session_state.chat_history.append({"role": "user", "content": user_input})
             st.session_state.chat_history.append({"role": "assistant", "content": emergency_msg})
-            st.session_state.health_input = ""
             st.rerun()
             return
 
@@ -98,7 +106,6 @@ def render_health_chat():
             response = "I am Health Care First AI. I can only answer healthcare-related questions."
             st.session_state.chat_history.append({"role": "user", "content": user_input})
             st.session_state.chat_history.append({"role": "assistant", "content": response})
-            st.session_state.health_input = ""
             st.rerun()
             return
 
@@ -115,7 +122,6 @@ def render_health_chat():
         # STAGE 4: Store messages in session state
         st.session_state.chat_history.append({"role": "user", "content": user_input})
         st.session_state.chat_history.append({"role": "assistant", "content": response})
-        st.session_state.health_input = ""
         st.rerun()
 
     # Input section: use chat_input so Enter submits like ChatGPT
@@ -125,8 +131,7 @@ def render_health_chat():
     )
 
     if user_input:
-        st.session_state.health_input = user_input
-        _process_submission()
+        _process_submission(user_input)
     
     # Sidebar suggestions
     st.markdown("---")
@@ -142,30 +147,7 @@ def render_health_chat():
     
     for idx, suggestion in enumerate(suggestions):
         if st.button(f"❓ {suggestion}", use_container_width=True, key=f"suggest_{idx}"):
-            is_health, _ = is_healthcare_question(suggestion)
-            if not is_health:
-                response = "I am Health Care First AI. I can only answer healthcare-related questions."
-            else:
-                with st.spinner("🔄 Getting AI response..."):
-                    response = get_healthcare_response(
-                        suggestion,
-                        st.session_state.chat_history
-                    )
-
-            st.session_state.chat_history.append(
-                {
-                    "role": "user",
-                    "content": suggestion
-                }
-            )
-            st.session_state.chat_history.append(
-                {
-                    "role": "assistant",
-                    "content": response
-                }
-            )
-
-            st.rerun()
+            _process_submission(suggestion)
     
     if st.button("🗑️ Clear Chat History", use_container_width=True):
         st.session_state.chat_history = []
