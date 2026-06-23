@@ -1,19 +1,24 @@
 """Groq API integration for healthcare AI."""
 
 import os
+from dotenv import load_dotenv
 import traceback
 from typing import Generator
 from groq import Groq
 from utils.health_utils import is_healthcare_question, HEALTHCARE_ONLY_RESPONSE
 
+load_dotenv()
+
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+MISSING_API_KEY_ERROR = "GROQ_API_KEY not found. Please configure your environment variables."
+
 def initialize_groq_client():
     """Initialize Groq client with API key."""
-    api_key = os.getenv('GROQ_API_KEY')
-    if not api_key:
-        raise ValueError("GROQ_API_KEY environment variable not set")
+    if not GROQ_API_KEY:
+        raise ValueError(MISSING_API_KEY_ERROR)
     
     # Strip whitespace to handle formatting issues
-    api_key = api_key.strip()
+    api_key = GROQ_API_KEY.strip()
     
     return Groq(api_key=api_key)
 
@@ -103,15 +108,12 @@ def get_healthcare_response(
         Response text from the AI model
     """
     try:
-        # Load API key
-        api_key = os.getenv('GROQ_API_KEY')
-        if not api_key:
-            return "❌ API Key not found. Please set GROQ_API_KEY environment variable."
-        
         # Initialize client
         try:
             client = initialize_groq_client()
         except Exception as e:
+            if isinstance(e, ValueError) and str(e) == MISSING_API_KEY_ERROR:
+                return MISSING_API_KEY_ERROR
             return f"❌ Failed to initialize Groq client: {str(e)}"
         
         # Validate healthcare question

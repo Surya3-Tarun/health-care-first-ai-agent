@@ -82,21 +82,37 @@ pip install -r requirements.txt
 
 ### 4. Setup Environment Variables
 
-**Create .env file:**
+**Local machine**
+
+**Windows (PowerShell):**
+```powershell
+Copy-Item .env.example .env
+```
+
+**macOS/Linux:**
 ```bash
 cp .env.example .env
 ```
 
-**Edit .env and add your Groq API key:**
+**Edit `.env` and add your Groq API key:**
 ```
 GROQ_API_KEY=your_groq_api_key_here
 ```
 
-**Get Groq API Key:**
-1. Visit https://console.groq.com
-2. Sign up for free account
-3. Generate API key
-4. Add to .env file
+**Streamlit Cloud**
+
+1. Open your app on Streamlit Cloud.
+2. Go to Settings > Secrets / Environment variables.
+3. Add `GROQ_API_KEY` with your Groq API key.
+4. Deploy or redeploy the app.
+
+**Railway**
+
+1. Open your Railway project.
+2. Go to Variables.
+3. Add `GROQ_API_KEY` with your Groq API key.
+
+> If `GROQ_API_KEY` is missing, the app will show: `GROQ_API_KEY not found. Please configure your environment variables.`
 
 ### 5. Verify Installation
 
