@@ -1,9 +1,7 @@
 """⊕ HEALTHFIRST AI - Health Chat Agent | UFO AI Conversation"""
 
 import streamlit as st
-import traceback
-from utils.groq_utils import get_healthcare_response
-from utils.health_utils import is_healthcare_question, detect_emergency
+from utils.agent.healthcare_agent import HealthcareAgent
 from utils.emergency_detector import detect_emergency_condition
 
 # Initialize suggested topic session state
@@ -18,6 +16,9 @@ if 'conversation_count' not in st.session_state:
 
 if 'emergency_alerts' not in st.session_state:
     st.session_state.emergency_alerts = 0
+
+if 'agent_instance' not in st.session_state:
+    st.session_state.agent_instance = HealthcareAgent()
 
 
 def render_health_chat():
@@ -98,28 +99,15 @@ def render_health_chat():
             st.rerun()
             return
 
-        # STAGE 2: Validate if healthcare question
-        is_health, category = is_healthcare_question(user_input)
-        st.write("Health Check:", is_health)
-
-        if not is_health:
-            response = "I am Health Care First AI. I can only answer healthcare-related questions."
-            st.session_state.chat_history.append({"role": "user", "content": user_input})
-            st.session_state.chat_history.append({"role": "assistant", "content": response})
-            st.rerun()
-            return
-
-        # STAGE 3: Call Groq API for healthcare question
-        with st.spinner("🔄 Getting AI response..."):
+        with st.spinner("🔄 Processing your health request..."):
             try:
-                response = get_healthcare_response(user_input, st.session_state.chat_history)
+                response = st.session_state.agent_instance.process(user_input)
                 if not response or response.startswith("❌"):
                     st.error(response)
             except Exception as e:
-                st.error(f"❌ Error calling AI: {str(e)}")
+                st.error(f"❌ Error processing AI agent workflow: {str(e)}")
                 response = f"⚠️ Error: {str(e)}"
 
-        # STAGE 4: Store messages in session state
         st.session_state.chat_history.append({"role": "user", "content": user_input})
         st.session_state.chat_history.append({"role": "assistant", "content": response})
         st.rerun()

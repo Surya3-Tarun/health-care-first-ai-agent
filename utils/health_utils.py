@@ -115,6 +115,14 @@ def detect_emergency(text: str) -> bool:
     return False
 
 
+def get_agent_response(user_input: str, conversation_history: List[Dict] | None = None) -> str:
+    """Compatibility helper that uses the agent pipeline when available."""
+    from utils.agent.healthcare_agent import HealthcareAgent
+
+    agent = HealthcareAgent()
+    return agent.process(user_input)
+
+
 def get_emergency_response() -> str:
     """Get the emergency alert response."""
     return """

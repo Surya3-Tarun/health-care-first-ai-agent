@@ -2,8 +2,7 @@
 
 import os
 from dotenv import load_dotenv
-import traceback
-from typing import Generator
+from typing import Optional
 from groq import Groq
 from utils.health_utils import is_healthcare_question, HEALTHCARE_ONLY_RESPONSE
 
@@ -95,7 +94,7 @@ You are conversational, professional, knowledgeable, and prioritize patient safe
 
 def get_healthcare_response(
     user_message: str,
-    conversation_history: list = None
+    conversation_history: Optional[list] = None
 ) -> str:
     """
     Get healthcare response from Groq API.
